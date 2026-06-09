@@ -1,0 +1,10 @@
+{
+  "command": "claude -p --permission-mode acceptEdits",
+  "auto_discover": true,
+  "notes": [
+    "Copy this file to claude_dispatch_config.json and set command to your local Claude Code CLI command if auto-discovery is not enough.",
+    "This config is used by dispatch-claude --mode cli; the default --mode auto opens a visible Terminal session and expects claude on PATH.",
+    "The cli dispatcher sends the prompt through stdin and runs from the project root.",
+    "Use -p for non-interactive execution."
+  ]
+}

@@ -1,0 +1,2 @@
+model,best_degree,n_knots,alpha,train_rmse,train_r2,cv_rmse_spline,cv_r2_spline,cv_rmse_linear,cv_r2_linear,delta_rmse,residual_shapiro_p,residual_pearson_r,residual_pearson_p,n_samples,n_subjects,gestation_range,bmi_range,sanity_warnings
+Spline-Ridge-v2 (B),3,5,88.58667904100822,0.03151038833870314,0.12076507357197164,0.032355421373729785,0.03820043967805069,0.032852479988649166,0.007273709002884354,0.0004970586149193809,5.248584092924213e-17,0.031052612405283515,0.3106477239271542,1068,267,11.0–24.9,20.7–46.9,1

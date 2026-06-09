@@ -1,0 +1,246 @@
+{
+  "version": "0.2.24",
+  "project": "Math Magic",
+  "tools": [
+    {
+      "id": "agentctl",
+      "name": "Agent Controller",
+      "path": "05_code/tools/agentctl.py",
+      "owner": "Codex",
+      "purpose": "Workflow controller for the sequential multi-agent modeling process: problem import, data scan, current-question scheme preparation, user approval briefs, Claude prompts, Claude report ingestion, Codex reviews, model confirmation, figure approval, paper checks, PDF layout checks, and LaTeX compilation.",
+      "command_examples": [
+        "python 05_code/tools/agentctl.py env-check",
+        "python 05_code/tools/agentctl.py doctor --target-os windows --write-vscode-smoke-task",
+        "python 05_code/tools/agentctl.py status",
+        "python 05_code/tools/agentctl.py import-problem --statement 01_problem/source/problem.md --title 训练题目 --data-dir 01_problem/data",
+        "python 05_code/tools/agentctl.py scan-data --data-dir 01_problem/data",
+        "python 05_code/tools/agentctl.py set-active-question --question Q1 --defer-later",
+        "python 05_code/tools/agentctl.py prepare-schemes --question Q1",
+        "python 05_code/tools/agentctl.py create-approval-brief --question Q1",
+        "python 05_code/tools/agentctl.py approve-schemes --question Q1 --schemes B",
+        "python 05_code/tools/agentctl.py create-claude-prompt --question Q1 --scheme B",
+        "python 05_code/tools/agentctl.py dispatch-claude --question Q1 --scheme B --revision --mode auto",
+        "python 05_code/tools/agentctl.py dispatch-claude --question Q1 --scheme B --revision --mode terminal",
+        "python 05_code/tools/agentctl.py dispatch-claude --question Q1 --scheme B --revision --mode cli",
+        "python 05_code/tools/agentctl.py open-claude-monitor --question Q1 --scheme B",
+        "python 05_code/tools/agentctl.py install-vscode-tasks --question Q1 --scheme B",
+        "python 05_code/tools/agentctl.py install-vscode-tasks --question Q1 --scheme B --target-os windows",
+        "python 05_code/tools/agentctl.py watch-claude --question Q1 --scheme B --interval 30 --ingest --create-review --require-standard-outputs",
+        "python 05_code/tools/agentctl.py check-claude --question Q1 --scheme B --ingest --create-review --require-standard-outputs",
+        "python 05_code/tools/agentctl.py ingest-claude-report --question Q1 --scheme B --report path/to/report.md",
+        "python 05_code/tools/agentctl.py create-review --question Q1 --scheme B",
+        "python 05_code/tools/agentctl.py create-model-confirmation-brief --question Q1",
+        "python 05_code/tools/agentctl.py confirm-model --question Q1 --scheme B",
+        "python 05_code/tools/agentctl.py approve-figures --question Q1 --figures q1_result.png",
+        "python 05_code/tools/agentctl.py write-question-paper --question Q1",
+        "python 05_code/tools/agentctl.py finalize-summary-paper",
+        "python 05_code/tools/agentctl.py readiness",
+        "python 05_code/tools/agentctl.py layout-check --expect-label-page fig:q1_surface=5",
+        "python 05_code/tools/agentctl.py latex-check"
+      ],
+      "inputs": [
+        "00_shared/workflow_state.json",
+        "00_shared/PROJECT_STATE.md",
+        "00_shared/QUESTION_BOUNDARIES.md",
+        "01_problem/problem_statement.md",
+        "01_problem/data_dictionary.md",
+        "03_methods/**/*.md",
+        "04_claude_workorders/templates/claude_workorder_template.md",
+        "04_claude_workorders/completions/*.md",
+        "06_results/**/*.csv",
+        "06_results/**/*.md",
+        "07_paper/figures/*",
+        "07_paper/main.tex",
+        "07_paper/main.aux"
+      ],
+      "outputs": [
+        "00_shared/workflow_state.json",
+        "01_problem/problem_statement.md",
+        "01_problem/data_dictionary.md",
+        "03_methods/QX/codex_scheme_generation_prompt.md",
+        "03_methods/QX/approval_brief.md",
+        "03_methods/QX/model_confirmation_brief.md",
+        "04_claude_workorders/*_workorder_*.md",
+        "04_claude_workorders/*_claude_prompt.md",
+        "04_claude_workorders/dispatch_logs/*.log",
+        "04_claude_workorders/terminal_runs/*.sh",
+        "04_claude_workorders/terminal_runs/*.ps1",
+        "04_claude_workorders/terminal_runs/monitors/*.sh",
+        "04_claude_workorders/terminal_runs/monitors/*.ps1",
+        "04_claude_workorders/terminal_runs/CURRENT_TERMINAL_STATUS.json",
+        ".vscode/tasks.json",
+        "04_claude_workorders/completions/*.md",
+        "06_results/QX/logs/*_codex_review.md",
+        "06_results/QX/*_scheme_comparison.md",
+        "03_methods/QX/approved.md",
+        "07_paper/sections/model_qX.tex",
+        "07_paper/main.pdf",
+        "PDF layout audit results via layout-check"
+      ],
+      "dependencies": [
+        "python",
+        "xelatex",
+        "tesseract",
+        "pypdf",
+        "pymupdf",
+        "pytesseract",
+        "numpy",
+        "pandas",
+        "matplotlib",
+        "seaborn",
+        "scipy",
+        "scikit-learn",
+        "openpyxl",
+        "xlrd",
+        "statsmodels",
+        "networkx"
+      ]
+    },
+    {
+      "id": "pdf_style_extractor",
+      "name": "PDF Style Extractor",
+      "path": "05_code/tools/pdf_style_extractor.py",
+      "owner": "Codex",
+      "purpose": "Extract high-level structure signals from excellent-paper PDFs, with OCR fallback for scanned PDFs.",
+      "command_examples": [
+        "python 05_code/tools/pdf_style_extractor.py --input-dir 02_references/excellent_papers --out-csv 02_references/excellent_papers_style_signals.csv --out-md 02_references/excellent_papers_style_signals.md --ocr",
+        "python 05_code/tools/pdf_style_extractor.py --input-dir 02_references/excellent_papers --out-csv 02_references/sample.csv --out-md 02_references/sample.md --ocr --limit 1"
+      ],
+      "inputs": [
+        "02_references/excellent_papers/**/*.pdf"
+      ],
+      "outputs": [
+        "02_references/excellent_papers_style_signals.csv",
+        "02_references/excellent_papers_style_signals.md"
+      ],
+      "dependencies": [
+        "python",
+        "pymupdf",
+        "pytesseract",
+        "pillow",
+        "tesseract",
+        "chi_sim",
+        "eng"
+      ]
+    },
+    {
+      "id": "problem_statement_extractor",
+      "name": "Problem Statement Extractor",
+      "path": "05_code/tools/problem_statement_extractor.py",
+      "owner": "Codex",
+      "purpose": "Extract problem statements from CUMCM PDF files into Markdown, with OCR fallback for scanned statements.",
+      "command_examples": [
+        "python 05_code/tools/problem_statement_extractor.py --input 01_problem/source/C题.pdf --out 01_problem/source/C题_statement.md",
+        "python 05_code/tools/problem_statement_extractor.py --input 01_problem/source/C题.pdf --out 01_problem/source/C题_statement.md --ocr"
+      ],
+      "inputs": [
+        "01_problem/source/**/*.pdf"
+      ],
+      "outputs": [
+        "01_problem/source/**/*_statement.md",
+        "01_problem/problem_statement.md via agentctl import-problem"
+      ],
+      "dependencies": [
+        "python",
+        "pypdf",
+        "pymupdf",
+        "pytesseract",
+        "pillow",
+        "tesseract",
+        "chi_sim",
+        "eng"
+      ]
+    },
+    {
+      "id": "latex_paper",
+      "name": "LaTeX Paper Builder",
+      "path": "07_paper/main.tex",
+      "owner": "Codex",
+      "purpose": "Compile the current Chinese CUMCM-style paper skeleton into PDF.",
+      "command_examples": [
+        "cd 07_paper && xelatex -interaction=nonstopmode -halt-on-error main.tex"
+      ],
+      "inputs": [
+        "07_paper/main.tex",
+        "07_paper/sections/*.tex",
+        "07_paper/appendix/*.tex",
+        "07_paper/figures/*"
+      ],
+      "outputs": [
+        "07_paper/main.pdf"
+      ],
+      "dependencies": [
+        "xelatex",
+        "ctex",
+        "JXUSTmodeling.cls"
+      ]
+    },
+    {
+      "id": "figure_pipeline",
+      "name": "Figure Pipeline",
+      "path": "07_paper/figure_generation_workflow.md",
+      "owner": "Codex",
+      "purpose": "Define how reproducible data figures and generated schematic figures enter the paper.",
+      "command_examples": [
+        "MPLCONFIGDIR=.cache/matplotlib python <plot_script.py>"
+      ],
+      "inputs": [
+        "06_results/**/tables/*.csv",
+        "06_results/**/figures/*",
+        "07_paper/figure_generation_workflow.md"
+      ],
+      "outputs": [
+        "07_paper/figures/*"
+      ],
+      "dependencies": [
+        "matplotlib",
+        "seaborn",
+        "pandas",
+        "numpy",
+        "Codex imagegen skill for schematic raster assets"
+      ]
+    },
+    {
+      "id": "claude_workorder_template",
+      "name": "Claude Code Workorder Template",
+      "path": "04_claude_workorders/templates/claude_workorder_template.md",
+      "owner": "Codex",
+      "purpose": "Create bounded implementation tasks for Claude Code without allowing method drift.",
+      "command_examples": [
+        "python 05_code/tools/agentctl.py create-claude-prompt --question Q1 --scheme B"
+      ],
+      "inputs": [
+        "03_methods/QX/scheme_X.md",
+        "03_methods/QX/approved.md"
+      ],
+      "outputs": [
+        "04_claude_workorders/QX_scheme_X_workorder_001.md",
+        "04_claude_workorders/QX_scheme_X_claude_prompt.md"
+      ],
+      "dependencies": [
+        "python"
+      ]
+    },
+    {
+      "id": "workflow_commands",
+      "name": "Workflow Command Guide",
+      "path": "08_agent_design/WORKFLOW_COMMANDS.md",
+      "owner": "Codex",
+      "purpose": "Human-readable command sequence for running the full multi-agent workflow from problem import to paper validation.",
+      "command_examples": [
+        "python 05_code/tools/agentctl.py readiness",
+        "python 05_code/tools/agentctl.py status"
+      ],
+      "inputs": [
+        "05_code/tools/agentctl.py",
+        "00_shared/workflow_state.json"
+      ],
+      "outputs": [
+        "workflow operation guidance"
+      ],
+      "dependencies": [
+        "python"
+      ]
+    }
+  ]
+}

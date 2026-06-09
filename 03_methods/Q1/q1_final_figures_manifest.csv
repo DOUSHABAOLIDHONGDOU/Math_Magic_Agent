@@ -1,0 +1,7 @@
+figure_id,path,kind
+Q1-FIG-001,07_paper/figures/q1_fig1_gestation_effect.png,真实数据图
+Q1-FIG-002,07_paper/figures/q1_fig2_bmi_effect.png,真实数据图
+Q1-FIG-003,07_paper/figures/q1_fig3_gestation_bmi_surface.png,真实数据图
+Q1-FIG-004,07_paper/figures/q1_fig4_spline_sensitivity.png,真实数据图
+Q1-FIG-005,07_paper/figures/q1_fig5_model_flow.png,流程图
+Q1-FIG-SHEET,03_methods/Q1/q1_figure_approval_sheet.png,审批总览

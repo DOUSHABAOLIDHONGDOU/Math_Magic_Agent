@@ -1,0 +1,10 @@
+{
+  "command": "claude -p --permission-mode acceptEdits",
+  "auto_discover": true,
+  "notes": [
+    "Global Claude Code CLI is available for this project.",
+    "Installed via npm into the conda base prefix.",
+    "The default dispatch route opens a visible Terminal session.",
+    "This command is used by dispatch-claude --mode cli for non-interactive fallback."
+  ]
+}
