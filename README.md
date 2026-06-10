@@ -1,5 +1,8 @@
 # Math Magic Agent
 
+[![tests](https://github.com/DOUSHABAOLIDHONGDOU/Math_Magic_Agent/actions/workflows/test.yml/badge.svg)](https://github.com/DOUSHABAOLIDHONGDOU/Math_Magic_Agent/actions/workflows/test.yml)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 > 中国大学生数学建模赛前训练用的 **Codex + Claude Code 多 Agent 协作工作流**。
 > 从题目导入到论文 PDF，全部命令化驱动，43 个自动化测试覆盖。
 
