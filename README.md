@@ -5,6 +5,8 @@
 
 > 中国大学生数学建模赛前训练用的 **Codex + Claude Code 多 Agent 协作工作流**。
 > 从题目导入到论文 PDF，全部命令化驱动，43 个自动化测试覆盖。
+>
+> 项目缘起、战绩、免责声明：见 [INTRODUCTION.md](INTRODUCTION.md) / [INTRODUCTION.pdf](INTRODUCTION.pdf)
 
 ## 它能做什么
 
