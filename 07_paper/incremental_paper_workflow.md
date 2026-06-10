@@ -4,14 +4,15 @@
 
 ## 单题完成后的固定动作
 
-每个问题完成以下节点后，才能写入对应小节：
+每个问题完成以下节点后，必须写入对应小节并编译 PDF：
 
 1. 方案已审批；
 2. Claude Code 已完成代码和结果；
 3. Codex 代码与结果审查为 `PASS`；
 4. 用户完成模型确认；
-5. Codex 生成中文最终图；
-6. 用户完成图表审批。
+5. 已有可支撑正文的公式、结果表、日志或运行结论。
+
+图表审批不再阻塞第一次单题入文。首次 `write-question-paper` 先写正文、公式和结果表；最终中文图由 Codex 生成并经用户审批后，再补入该小节并重编译。确需恢复严格门禁时，可使用 `write-question-paper --require-figures-approved`。
 
 图表审批默认代表中文最终图审批：
 
@@ -51,6 +52,7 @@ python 05_code/tools/agentctl.py write-question-paper --question Q1
 - `07_paper/sections/problem_analysis.tex` 中的整体分析和跨问题依赖总结
 - `07_paper/sections/model_validation.tex`
 - `07_paper/sections/evaluation.tex`
+- `07_paper/appendix/ai_usage_appendix.tex`
 - 最终参考文献整理
 - 总结性关键词和摘要中的综合结果
 

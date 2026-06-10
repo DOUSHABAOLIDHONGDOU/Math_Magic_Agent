@@ -1,5 +1,5 @@
 {
-  "version": "0.2.24",
+  "version": "0.3.0",
   "project": "Math Magic",
   "tools": [
     {
@@ -7,12 +7,14 @@
       "name": "Agent Controller",
       "path": "05_code/tools/agentctl.py",
       "owner": "Codex",
-      "purpose": "Workflow controller for the sequential multi-agent modeling process: problem import, data scan, current-question scheme preparation, user approval briefs, Claude prompts, Claude report ingestion, Codex reviews, model confirmation, figure approval, paper checks, PDF layout checks, and LaTeX compilation.",
+      "purpose": "Workflow controller for the sequential multi-agent modeling process: problem import, stale artifact archival, data scan, current-question scheme preparation, user approval briefs, Claude prompts, Claude report ingestion, Codex reviews, model confirmation, per-question LaTeX writing, figure approval, paper checks, PDF layout checks, and LaTeX compilation.",
       "command_examples": [
         "python 05_code/tools/agentctl.py env-check",
         "python 05_code/tools/agentctl.py doctor --target-os windows --write-vscode-smoke-task",
         "python 05_code/tools/agentctl.py status",
         "python 05_code/tools/agentctl.py import-problem --statement 01_problem/source/problem.md --title 训练题目 --data-dir 01_problem/data",
+        "python 05_code/tools/agentctl.py archive-stale-artifacts --dry-run",
+        "python 05_code/tools/agentctl.py archive-stale-artifacts --force --reason \"archive old generated artifacts before continuing current problem\"",
         "python 05_code/tools/agentctl.py scan-data --data-dir 01_problem/data",
         "python 05_code/tools/agentctl.py set-active-question --question Q1 --defer-later",
         "python 05_code/tools/agentctl.py prepare-schemes --question Q1",
@@ -36,7 +38,14 @@
         "python 05_code/tools/agentctl.py finalize-summary-paper",
         "python 05_code/tools/agentctl.py readiness",
         "python 05_code/tools/agentctl.py layout-check --expect-label-page fig:q1_surface=5",
-        "python 05_code/tools/agentctl.py latex-check"
+        "python 05_code/tools/agentctl.py latex-check",
+        "python 05_code/tools/agentctl.py auto-eda --question Q1",
+        "python 05_code/tools/agentctl.py compare-schemes --question Q1",
+        "python 05_code/tools/agentctl.py index-papers",
+        "python 05_code/tools/agentctl.py retrieve-context --question Q1 --top-k 5",
+        "python 05_code/tools/agentctl.py figure-lint",
+        "python 05_code/tools/agentctl.py set-trust-profile --profile fast",
+        "python 05_code/tools/agentctl.py gen-ai-log"
       ],
       "inputs": [
         "00_shared/workflow_state.json",
@@ -74,6 +83,8 @@
         "06_results/QX/*_scheme_comparison.md",
         "03_methods/QX/approved.md",
         "07_paper/sections/model_qX.tex",
+        "00_shared/archive/stale_artifacts/*/manifest.json",
+        "00_shared/archive/stale_artifacts/*/manifest.md",
         "07_paper/main.pdf",
         "PDF layout audit results via layout-check"
       ],
@@ -104,7 +115,8 @@
       "purpose": "Extract high-level structure signals from excellent-paper PDFs, with OCR fallback for scanned PDFs.",
       "command_examples": [
         "python 05_code/tools/pdf_style_extractor.py --input-dir 02_references/excellent_papers --out-csv 02_references/excellent_papers_style_signals.csv --out-md 02_references/excellent_papers_style_signals.md --ocr",
-        "python 05_code/tools/pdf_style_extractor.py --input-dir 02_references/excellent_papers --out-csv 02_references/sample.csv --out-md 02_references/sample.md --ocr --limit 1"
+        "python 05_code/tools/pdf_style_extractor.py --input-dir 02_references/excellent_papers --out-csv 02_references/sample.csv --out-md 02_references/sample.md --ocr --limit 1",
+        "python 05_code/tools/pdf_style_extractor.py --input-dir 02_references/excellent_papers --full-ocr --ocr-texts-dir 02_references/ocr_texts --ocr-dpi 300"
       ],
       "inputs": [
         "02_references/excellent_papers/**/*.pdf"
@@ -130,8 +142,8 @@
       "owner": "Codex",
       "purpose": "Extract problem statements from CUMCM PDF files into Markdown, with OCR fallback for scanned statements.",
       "command_examples": [
-        "python 05_code/tools/problem_statement_extractor.py --input 01_problem/source/C题.pdf --out 01_problem/source/C题_statement.md",
-        "python 05_code/tools/problem_statement_extractor.py --input 01_problem/source/C题.pdf --out 01_problem/source/C题_statement.md --ocr"
+        "python 05_code/tools/problem_statement_extractor.py --input 01_problem/source/problem.pdf --out 01_problem/source/problem_statement.md",
+        "python 05_code/tools/problem_statement_extractor.py --input 01_problem/source/problem.pdf --out 01_problem/source/problem_statement.md --ocr"
       ],
       "inputs": [
         "01_problem/source/**/*.pdf"

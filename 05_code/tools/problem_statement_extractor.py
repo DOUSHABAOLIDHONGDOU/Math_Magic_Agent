@@ -6,9 +6,17 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-import fitz
-import pytesseract
-from PIL import Image
+try:
+    import fitz
+except ImportError:  # Optional: pypdf is enough for text PDFs.
+    fitz = None
+
+try:
+    import pytesseract
+    from PIL import Image
+except ImportError:  # Optional: only required for OCR fallback.
+    pytesseract = None
+    Image = None
 
 
 def normalize_text(text: str) -> str:
@@ -18,13 +26,25 @@ def normalize_text(text: str) -> str:
 
 
 def pdf_text(path: Path) -> str:
-    doc = fitz.open(path)
-    parts = [page.get_text("text") for page in doc]
-    doc.close()
+    if fitz is not None:
+        doc = fitz.open(path)
+        parts = [page.get_text("text") for page in doc]
+        doc.close()
+        return normalize_text("\n".join(parts))
+
+    try:
+        from pypdf import PdfReader
+    except ImportError as exc:
+        raise SystemExit("PDF text extraction requires either pymupdf or pypdf") from exc
+
+    reader = PdfReader(str(path))
+    parts = [page.extract_text() or "" for page in reader.pages]
     return normalize_text("\n".join(parts))
 
 
 def ocr_pdf(path: Path, dpi: int, lang: str) -> str:
+    if fitz is None or pytesseract is None or Image is None:
+        raise SystemExit("OCR requires pymupdf, pytesseract, pillow, and the tesseract command")
     doc = fitz.open(path)
     parts = []
     for idx, page in enumerate(doc):
@@ -46,7 +66,7 @@ def infer_title(text: str, fallback: str) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--pdf", type=Path, required=True)
+    parser.add_argument("--pdf", "--input", dest="pdf", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--title", default=None)
     parser.add_argument("--ocr", action="store_true")

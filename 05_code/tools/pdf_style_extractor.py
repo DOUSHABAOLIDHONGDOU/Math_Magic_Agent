@@ -140,6 +140,31 @@ def ocr_selected_pages(
     return normalize_text("\n".join(parts)), pages_used, page_count
 
 
+def ocr_full_document(
+    pdf_path: Path,
+    dpi: int,
+    lang: str,
+) -> tuple[str, str, int]:
+    """OCR every page. Used when building the RAG corpus where partial OCR is too lossy."""
+    doc = fitz.open(pdf_path)
+    page_count = len(doc)
+    parts = []
+    for page_idx in range(page_count):
+        parts.append(f"\n\n--- OCR PAGE {page_idx + 1} ---\n")
+        parts.append(ocr_page(doc, page_idx, dpi=dpi, lang=lang))
+    doc.close()
+    pages_used = f"1-{page_count}"
+    return normalize_text("\n".join(parts)), pages_used, page_count
+
+
+def write_ocr_full_text(pdf_path: Path, out_dir: Path, text: str) -> Path:
+    """Save the full OCR text under ``out_dir`` for downstream RAG indexing."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    target = out_dir / f"{pdf_path.stem}.md"
+    target.write_text(text, encoding="utf-8")
+    return target
+
+
 def abstract_preview(text: str, max_len: int = 360) -> str:
     match = re.search(r"摘要[:：]?\s*(.+?)(关键词|关键字|一、|1\s)", text, flags=re.S)
     if not match:
@@ -163,10 +188,20 @@ def analyze_paper(
     ocr_last_pages: int = 2,
     ocr_dpi: int = 150,
     ocr_lang: str = "chi_sim+eng",
+    full_ocr: bool = False,
+    ocr_texts_dir: Path | None = None,
 ) -> PaperSignals:
     text, pages = extract_text(pdf_path, max_pages=max_pages)
     ocr_pages = ""
-    if use_ocr and len(text) < 100:
+    if full_ocr:
+        text, ocr_pages, pages = ocr_full_document(
+            pdf_path,
+            dpi=ocr_dpi,
+            lang=ocr_lang,
+        )
+        if ocr_texts_dir is not None:
+            write_ocr_full_text(pdf_path, ocr_texts_dir, text)
+    elif use_ocr and len(text) < 100:
         text, ocr_pages, pages = ocr_selected_pages(
             pdf_path,
             first_pages=ocr_first_pages,
@@ -252,13 +287,24 @@ def infer_year(path: Path) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-dir", type=Path, required=True)
-    parser.add_argument("--out-csv", type=Path, required=True)
-    parser.add_argument("--out-md", type=Path, required=True)
+    parser.add_argument("--out-csv", type=Path, default=None)
+    parser.add_argument("--out-md", type=Path, default=None)
     parser.add_argument("--max-pages", type=int, default=None)
     parser.add_argument("--ocr", action="store_true")
+    parser.add_argument(
+        "--full-ocr",
+        action="store_true",
+        help="OCR every page (slow); required for building the BM25 RAG corpus.",
+    )
+    parser.add_argument(
+        "--ocr-texts-dir",
+        type=Path,
+        default=None,
+        help="when --full-ocr is set, save per-PDF OCR markdown under this dir for downstream RAG indexing.",
+    )
     parser.add_argument("--ocr-first-pages", type=int, default=3)
     parser.add_argument("--ocr-last-pages", type=int, default=2)
-    parser.add_argument("--ocr-dpi", type=int, default=150)
+    parser.add_argument("--ocr-dpi", type=int, default=300)
     parser.add_argument("--ocr-lang", default="chi_sim+eng")
     parser.add_argument("--limit", type=int, default=None)
     args = parser.parse_args()
@@ -266,6 +312,11 @@ def main() -> None:
     pdfs = sorted(args.input_dir.rglob("*.pdf"))
     if args.limit is not None:
         pdfs = pdfs[: args.limit]
+
+    if args.full_ocr and not args.ocr_texts_dir:
+        # Default to 02_references/ocr_texts to match the RAG module.
+        args.ocr_texts_dir = args.input_dir.parent / "ocr_texts"
+
     signals = [
         analyze_paper(
             pdf,
@@ -275,14 +326,20 @@ def main() -> None:
             ocr_last_pages=args.ocr_last_pages,
             ocr_dpi=args.ocr_dpi,
             ocr_lang=args.ocr_lang,
+            full_ocr=args.full_ocr,
+            ocr_texts_dir=args.ocr_texts_dir,
         )
         for pdf in pdfs
     ]
-    write_csv(signals, args.out_csv)
-    write_markdown(signals, args.out_md)
+    if args.out_csv:
+        write_csv(signals, args.out_csv)
+        print(args.out_csv)
+    if args.out_md:
+        write_markdown(signals, args.out_md)
+        print(args.out_md)
     print(f"analyzed {len(signals)} PDFs")
-    print(args.out_csv)
-    print(args.out_md)
+    if args.ocr_texts_dir:
+        print(f"OCR texts in: {args.ocr_texts_dir}")
 
 
 if __name__ == "__main__":

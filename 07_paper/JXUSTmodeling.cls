@@ -10,13 +10,42 @@
 \RequirePackage{amsmath,amssymb}
 \RequirePackage{newtxtext,newtxmath,esint}
 \RequirePackage{sourcecodepro}
-\setCJKmainfont[Mapping=fullwidth-stop,AutoFakeBold=true]{Songti SC}
-\setCJKsansfont[AutoFakeBold=true]{Heiti SC}
-\setCJKmonofont[AutoFakeBold=true]{Hiragino Sans GB}
-\setCJKfamilyfont{zhsong}[Mapping=fullwidth-stop,AutoFakeBold=true]{Songti SC}
-\setCJKfamilyfont{zhhei}[AutoFakeBold=true]{Heiti SC}
-\setCJKfamilyfont{zhkai}[AutoFakeBold=true]{Kaiti SC}
-\setCJKfamilyfont{zhfs}[AutoFakeBold=true]{Songti SC}
+\newcommand{\MathMagicUseWindowsCJKFonts}{%
+  \setCJKmainfont[Mapping=fullwidth-stop,AutoFakeBold=true]{SimSun}%
+  \setCJKsansfont[AutoFakeBold=true]{SimHei}%
+  \setCJKmonofont[AutoFakeBold=true]{Microsoft YaHei}%
+  \setCJKfamilyfont{zhsong}[Mapping=fullwidth-stop,AutoFakeBold=true]{SimSun}%
+  \setCJKfamilyfont{zhhei}[AutoFakeBold=true]{SimHei}%
+  \setCJKfamilyfont{zhkai}[AutoFakeBold=true]{KaiTi}%
+  \setCJKfamilyfont{zhfs}[AutoFakeBold=true]{FangSong}%
+}
+\newcommand{\MathMagicUseMacCJKFonts}{%
+  \setCJKmainfont[Mapping=fullwidth-stop,AutoFakeBold=true]{Songti SC}%
+  \setCJKsansfont[AutoFakeBold=true]{Heiti SC}%
+  \setCJKmonofont[AutoFakeBold=true]{Hiragino Sans GB}%
+  \setCJKfamilyfont{zhsong}[Mapping=fullwidth-stop,AutoFakeBold=true]{Songti SC}%
+  \setCJKfamilyfont{zhhei}[AutoFakeBold=true]{Heiti SC}%
+  \setCJKfamilyfont{zhkai}[AutoFakeBold=true]{Kaiti SC}%
+  \setCJKfamilyfont{zhfs}[AutoFakeBold=true]{Songti SC}%
+}
+\newcommand{\MathMagicUseFandolCJKFonts}{%
+  \setCJKmainfont[Mapping=fullwidth-stop,AutoFakeBold=true]{FandolSong-Regular}%
+  \setCJKsansfont[AutoFakeBold=true]{FandolHei-Regular}%
+  \setCJKmonofont[AutoFakeBold=true]{FandolFang-Regular}%
+  \setCJKfamilyfont{zhsong}[Mapping=fullwidth-stop,AutoFakeBold=true]{FandolSong-Regular}%
+  \setCJKfamilyfont{zhhei}[AutoFakeBold=true]{FandolHei-Regular}%
+  \setCJKfamilyfont{zhkai}[AutoFakeBold=true]{FandolKai-Regular}%
+  \setCJKfamilyfont{zhfs}[AutoFakeBold=true]{FandolFang-Regular}%
+}
+\IfFontExistsTF{SimSun}{%
+  \MathMagicUseWindowsCJKFonts
+}{%
+  \IfFontExistsTF{Songti SC}{%
+    \MathMagicUseMacCJKFonts
+  }{%
+    \MathMagicUseFandolCJKFonts
+  }%
+}
 \providecommand{\songti}{\CJKfamily{zhsong}}
 \providecommand{\heiti}{\CJKfamily{zhhei}}
 \providecommand{\kaishu}{\CJKfamily{zhkai}}

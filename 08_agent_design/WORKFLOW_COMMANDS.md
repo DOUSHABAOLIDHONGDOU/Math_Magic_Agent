@@ -16,16 +16,23 @@ python 05_code/tools/agentctl.py init-state
 
 ```bash
 python 05_code/tools/problem_statement_extractor.py \
-  --input 01_problem/source/C题.pdf \
-  --out 01_problem/source/C题_statement.md
+  --input 01_problem/source/problem.pdf \
+  --out 01_problem/source/problem_statement.md
 ```
 
 ```bash
 python 05_code/tools/agentctl.py import-problem \
-  --statement 01_problem/source/C题_statement.md \
+  --statement 01_problem/source/problem_statement.md \
   --title "训练题目名称" \
   --problem-id "TRAIN-001" \
   --data-dir 01_problem/data
+```
+
+`import-problem` 默认会先归档上一题生成物，避免旧方案、旧工单、旧图表或旧论文段落污染新题。若只想检查或手动清理旧题残留：
+
+```bash
+python 05_code/tools/agentctl.py archive-stale-artifacts --dry-run
+python 05_code/tools/agentctl.py archive-stale-artifacts --force --reason "archive old generated artifacts before continuing current problem"
 ```
 
 扫描数据字段：
@@ -44,7 +51,7 @@ python 05_code/tools/agentctl.py approve-language --language Python --notes "用
 
 ## 2. Codex 逐问生成三套方案
 
-设置当前问题。正式流程从第一问开始，后续问题要等前一问模型确认后再解锁：
+设置当前问题。正式流程从第一问开始，后续问题要等前一问写入 LaTeX、编译 PDF 并通过版面检查后再解锁：
 
 ```bash
 python 05_code/tools/agentctl.py set-active-question --question Q1 --defer-later
@@ -111,9 +118,9 @@ python 05_code/tools/agentctl.py dispatch-claude \
   --require-standard-outputs
 ```
 
-当前主流程默认使用 `--mode auto`，它等价于 `--mode terminal`：在当前系统生成可见终端脚本，并运行 Claude Code。Windows 交付环境推荐优先使用下面的 VS Code 集成终端任务。
+当前主流程默认使用 `--mode auto`，它等价于 `--mode terminal`：在当前系统生成可见终端脚本，从项目根目录运行 Claude Code。默认会追加 `--continue`，让 Claude Code 续接该项目目录下最近一次会话上下文。
 
-默认权限模式为 `default`。若希望减少编辑审批，可追加 `--terminal-permission-mode acceptEdits`；`bypassPermissions` 只允许在完全信任工作区和命令边界时临时使用。
+默认权限模式为 `bypassPermissions`，并通过配置追加 `--dangerously-skip-permissions`，适用于用户已确认可信的本地训练仓库，减少每次编辑/运行的审批点击。只有明确需要断开 Claude Code 记忆时，才追加 `--claude-session-mode new`。
 
 打开可见监控终端：
 
@@ -134,7 +141,7 @@ python 05_code/tools/agentctl.py install-vscode-tasks \
   --target-os windows
 ```
 
-安装后在 VS Code 执行任务 `Math Magic: Claude Q1-B visible session`。该任务并行打开 Claude 执行终端和监控终端；Windows 下生成 PowerShell 脚本，macOS/Linux 下生成 bash 脚本。不要再使用 VS Code Claude 插件 URI 或自动粘贴路线作为主流程。
+安装后在 VS Code 执行任务 `Math Magic: Claude QX-B visible session`。该任务并行打开 Claude 执行终端和监控终端；Windows 下生成 PowerShell 脚本，macOS/Linux 下生成 bash 脚本。不要再使用 VS Code Claude 插件 URI 或自动粘贴路线作为主流程。
 
 后台备用路线：
 
@@ -165,7 +172,7 @@ CLI 配置方式：
 
 - 临时配置：`CLAUDE_CODE_COMMAND="claude" python 05_code/tools/agentctl.py dispatch-claude ...`
 - 持久配置：复制 `04_claude_workorders/claude_dispatch_config.example.json` 为 `04_claude_workorders/claude_dispatch_config.json`，并填写本机 Claude Code 命令。
-- 主流程默认使用 `--mode auto` 打开可见终端；只有确实需要后台执行时才使用 `--mode cli`。
+- 主流程默认使用 `--mode auto` 打开可见终端；只有确实需要后台执行时才使用 `--mode cli`。可见终端脚本生成后会记录 `terminal_script_created`，真正运行时才记录 `running/run_started_at`。
 
 Codex 应定时监听 Claude Code 是否完成，而不是等待用户通知。建议在另一个终端运行：
 
@@ -214,11 +221,12 @@ python 05_code/tools/agentctl.py confirm-model --question Q1 --scheme B --notes 
 
 ## 单题入文与编译
 
-每个问题完成以下条件后，Codex 必须将该问题写入 LaTeX 并编译一次 PDF：
+每个问题完成以下条件后，Codex 必须立即将该问题写入 LaTeX 并编译一次 PDF：
 
 - 模型确认完成；
-- 中文最终图由 Codex 生成；
-- 图表审批完成。
+- 已有可支撑正文的公式、结果表、日志或运行结论。
+
+图表不再阻塞第一次单题入文。尚未审批最终中文图时，`write-question-paper` 先写正文、公式和结果表；图表审批后再补入最终中文图并重新编译。若某次任务确实要求恢复旧的严格门禁，可显式使用 `--require-figures-approved`。
 
 图表审批默认按中文最终图处理：
 
@@ -232,7 +240,7 @@ python 05_code/tools/agentctl.py approve-figures --question Q1 --figures q1_rela
 python 05_code/tools/agentctl.py write-question-paper --question Q1
 ```
 
-该命令只允许写 `07_paper/sections/model_qX.tex`。摘要、整体问题分析、模型检验、模型评价及推广等跨问题内容保持锁定。
+该命令只允许写 `07_paper/sections/model_qX.tex`。摘要、整体问题分析、模型检验、模型评价及推广、全局 AI 使用说明等跨问题内容保持锁定。
 
 全部问题写入后，才允许进入总结性章节：
 
@@ -276,9 +284,15 @@ python 05_code/tools/agentctl.py compare-schemes --question Q1
 python 05_code/tools/agentctl.py confirm-model --question Q1 --scheme B --notes "综合指标最优，论文解释性较好"
 ```
 
-`confirm-model` 完成后，下一问才解锁。
+`confirm-model` 完成后，必须继续运行 `write-question-paper`；该问成功编译入文后，下一问才解锁。
 
 ## 5. 图表和论文
+
+模型确认后写入单题正文并编译：
+
+```bash
+python 05_code/tools/agentctl.py write-question-paper --question Q1
+```
 
 用户审批最终图表：
 
@@ -286,10 +300,10 @@ python 05_code/tools/agentctl.py confirm-model --question Q1 --scheme B --notes 
 python 05_code/tools/agentctl.py approve-figures --question Q1 --figures "q1_result.png,q1_sensitivity.png"
 ```
 
-标记论文写入：
+图表补入后重新编译：
 
 ```bash
-python 05_code/tools/agentctl.py mark-paper-written --question Q1
+python 05_code/tools/agentctl.py latex-check
 ```
 
 检查论文文件：

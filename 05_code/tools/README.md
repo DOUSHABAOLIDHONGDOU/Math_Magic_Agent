@@ -140,7 +140,7 @@ conda run -n base python 05_code/tools/agentctl.py install-vscode-tasks \
   --target-os windows
 ```
 
-然后在 VS Code 运行任务 `Math Magic: Claude Q1-B visible session`。Windows 下会生成 PowerShell 脚本；macOS/Linux 可使用 `--target-os posix` 或默认 `auto`。该任务会并行打开 Claude 执行终端和监控终端，比 VS Code Claude 插件面板粘贴路线稳定。
+然后在 VS Code 运行任务 `Math Magic: Claude QX-B visible session`。Windows 下会生成 PowerShell 脚本；macOS/Linux 可使用 `--target-os posix` 或默认 `auto`。该任务会并行打开 Claude 执行终端和监控终端，比 VS Code Claude 插件面板粘贴路线稳定。
 
 发送最新返修提示词：
 
@@ -225,24 +225,24 @@ conda run -n base python 05_code/tools/agentctl.py check-claude \
 
 ```bash
 conda run -n base python 05_code/tools/problem_statement_extractor.py \
-  --input 01_problem/source/CUMCM2025Problems/C题/C题.pdf \
-  --out 01_problem/source/CUMCM2025Problems/C题/C题_statement.md
+  --input 01_problem/source/problem.pdf \
+  --out 01_problem/source/problem_statement.md
 ```
 
 导入工作流：
 
 ```bash
 conda run -n base python 05_code/tools/agentctl.py import-problem \
-  --statement 01_problem/source/CUMCM2025Problems/C题/C题_statement.md \
-  --title "C题 NIPT 的时点选择与胎儿的异常判定" \
-  --problem-id CUMCM2025-C \
-  --data-dir 01_problem/source/CUMCM2025Problems/C题 \
-  --num-questions 4
+  --statement 01_problem/source/problem_statement.md \
+  --title "训练题目名称" \
+  --problem-id TRAIN-001 \
+  --data-dir 01_problem/source/data \
+  --num-questions 3
 ```
 
 扫描数据：
 
 ```bash
 conda run -n base python 05_code/tools/agentctl.py scan-data \
-  --data-dir 01_problem/source/CUMCM2025Problems/C题
+  --data-dir 01_problem/source/data
 ```

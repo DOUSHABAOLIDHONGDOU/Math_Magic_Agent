@@ -20,7 +20,7 @@ python 05_code/tools/agentctl.py doctor --target-os windows --write-vscode-smoke
 
 ## 已验证能力
 
-- Python：conda base。
+- Python：不固定小版本，优先使用项目 `environment.yml` 或已有 conda/base 环境。
 - PDF 解析：`pypdf`, `PyMuPDF`
 - OCR：`tesseract`, `pytesseract`
 - OCR 语言：`chi_sim`, `eng`

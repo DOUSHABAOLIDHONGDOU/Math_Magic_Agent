@@ -2,7 +2,7 @@ name: math-magic
 channels:
   - conda-forge
 dependencies:
-  - python>=3.10
+  - python
   - pip
   - nodejs
   - tesseract
@@ -21,3 +21,6 @@ dependencies:
   - networkx
   - pillow
   - tqdm
+  - pip:
+    - rank-bm25
+    - pytest

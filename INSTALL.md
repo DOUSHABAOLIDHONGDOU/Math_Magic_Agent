@@ -33,7 +33,7 @@ python 05_code/tools/agentctl.py install-vscode-tasks --question Q1 --scheme B -
 然后在 VS Code 中运行：
 
 ```text
-Math Magic: Claude Q1-B visible session
+Math Magic: Claude QX-B visible session
 ```
 
 ### macOS / Linux
@@ -66,7 +66,7 @@ python -m pip install -r requirements.txt
 
 ## Claude Code CLI
 
-本项目的多 agent 调度默认调用全局 Claude Code CLI。创建或更新 conda 环境后安装：
+本项目的多 agent 调度默认调用 Claude Code CLI 或 VS Code Claude Code 扩展自带 native binary。创建或更新 conda 环境后安装：
 
 ```bash
 conda activate math-magic
@@ -80,13 +80,15 @@ claude --version
 04_claude_workorders/claude_dispatch_config.json
 ```
 
-默认命令：
+默认可见终端策略：
 
 ```text
-claude -p --permission-mode acceptEdits
+claude --dangerously-skip-permissions --permission-mode bypassPermissions --continue
 ```
 
-VS Code Claude Code 插件只作为人工观察和兜底，不再作为稳定自动派发入口。正式可见执行优先使用 VS Code 集成终端任务或系统终端中的 Claude Code CLI。
+正式可见执行优先使用项目根目录中的 PowerShell/bash 终端脚本。默认 `--continue` 用于保留 Claude Code 在当前项目目录的上下文；只有明确需要新对话时才使用 `--claude-session-mode new`。
+
+`environment.yml` 不固定 Python 小版本；如已有可用 conda/base 环境，也可以直接安装 `requirements.txt` 后运行 `agentctl.py env-check`。
 
 ## LaTeX
 
@@ -109,3 +111,29 @@ python 05_code/tools/agentctl.py latex-check
 python 05_code/tools/agentctl.py tools
 python 05_code/tools/agentctl.py readiness
 ```
+
+还可以跑测试套件确认本机环境一切就绪（43 个测试，秒级完成，不依赖 xelatex/tesseract/claude）：
+
+```bash
+python -m pip install pytest rank-bm25
+python -m pytest 05_code/tools/tests/ -q
+```
+
+## RAG (可选)
+
+如果希望让方案生成阶段读到同题型的优秀论文：
+
+```bash
+# 方式 A：手工放 .md/.txt 进 02_references/paper_texts/，每篇一文件
+python 05_code/tools/agentctl.py rag-status
+python 05_code/tools/agentctl.py index-papers
+
+# 方式 B：把扫描版优秀论文 PDF 放进 02_references/excellent_papers/，全篇 OCR
+python 05_code/tools/pdf_style_extractor.py \
+    --input-dir 02_references/excellent_papers \
+    --full-ocr --ocr-texts-dir 02_references/ocr_texts --ocr-dpi 300
+python 05_code/tools/agentctl.py index-papers
+```
+
+索引建好后，`prepare-schemes` 会自动检索相关段并注入 Codex 提示。详见
+`02_references/paper_texts/README.md`。

@@ -26,6 +26,8 @@ env/
 
 # Runtime-only Claude dispatch artifacts
 00_shared/.workflow_state.lock
+00_shared/archive/stale_artifacts/
+04_claude_workorders/claude_dispatch_config.json
 04_claude_workorders/dispatch_logs/*.log
 04_claude_workorders/terminal_runs/*.sh
 04_claude_workorders/terminal_runs/*.ps1
@@ -40,3 +42,50 @@ env/
 # Keep references/templates in the repo; keep raw archives optional.
 # math_exmaple.zip
 # 数模latex模版.zip
+
+# ---------------------------------------------------------------------------
+# Per-problem runtime artifacts. Agentctl regenerates these from the imported
+# problem statement + data dir + scheme files. Don't commit anything that's
+# specific to a problem you happen to have loaded locally.
+
+# Workflow state
+00_shared/workflow_state.json
+00_shared/snapshots/
+00_shared/AI_USAGE_LOG.md
+00_shared/DECISION_LOG.md
+00_shared/CONFLICT_LOG.md
+00_shared/PROJECT_STATE.md
+00_shared/QUESTION_BOUNDARIES.md
+
+# Imported problem material (user-supplied, often copyrighted)
+01_problem/source/
+01_problem/problem_statement.md
+01_problem/data_dictionary.md
+01_problem/raw_data_notes.md
+
+# Per-question generated artifacts
+03_methods/Q*/
+04_claude_workorders/Q*_scheme_*.md
+04_claude_workorders/completions/
+04_claude_workorders/vscode_bridge/
+05_code/Q*/
+06_results/Q*/
+07_paper/sections/model_q*.tex
+07_paper/figures/q*_fig*.*
+07_paper/main.pdf
+
+# RAG index + retrieval briefs are reproducible from paper_texts/
+02_references/bm25_index.pkl
+02_references/rag_context/
+02_references/ocr_texts/
+02_references/excellent_papers/*.pdf
+02_references/paper_texts/*.md
+02_references/paper_texts/*.txt
+# Keep the README and the committed demo "sample_*.md" files
+!02_references/paper_texts/README.md
+!02_references/paper_texts/sample_*.md
+!02_references/excellent_papers/README.md
+
+# Misc
+.pytest_cache/
+05_code/tools/.pytest_cache/

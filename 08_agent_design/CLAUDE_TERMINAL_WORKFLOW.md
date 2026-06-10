@@ -15,7 +15,7 @@ python 05_code/tools/agentctl.py dispatch-claude \
   --require-standard-outputs
 ```
 
-`auto` 等价于 `terminal`。脚本会写入 `04_claude_workorders/terminal_runs/` 并在可见终端里运行 Claude Code。macOS/Linux 生成 bash 脚本；Windows 生成 PowerShell 脚本。用户可以看到 Claude 的实时输出和权限审批；Codex 继续在本对话中监听完成报告。
+`auto` 等价于 `terminal`。脚本会写入 `04_claude_workorders/terminal_runs/` 并在可见终端里运行 Claude Code。macOS/Linux 生成 bash 脚本；Windows 生成 PowerShell 脚本。终端启动目录固定为项目根目录，Claude Code 默认追加 `--continue`，复用该项目目录下最近一次 Claude Code 会话上下文；Codex 继续在本对话中监听完成报告。
 
 ## 监控界面
 
@@ -57,18 +57,18 @@ python 05_code/tools/agentctl.py doctor --target-os windows --write-vscode-smoke
 默认：
 
 ```bash
---terminal-permission-mode default
+--terminal-permission-mode bypassPermissions
 ```
 
-此时 Claude Code 的权限请求显示在终端中，由用户批准或拒绝。
+当前本地训练工作流默认同时使用 `--dangerously-skip-permissions` 和 `--permission-mode bypassPermissions`，减少 Claude Code 每次编辑/运行时的人工点击。该默认值只适用于用户已确认可信的本地题目仓库和明确工单边界。
 
-如果用户已确认工作区和任务边界，可以显式使用：
+如果确实需要让 Claude Code 开启一个全新上下文，必须显式加：
 
 ```bash
---terminal-permission-mode acceptEdits
+--claude-session-mode new
 ```
 
-`bypassPermissions` 不作为常规默认，只能临时用于完全可信的训练环境。
+普通优化轮次不要使用 `new`，否则 Claude Code 记忆不到上一轮实现和调试上下文。
 
 ## 后台备用
 

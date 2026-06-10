@@ -10,6 +10,7 @@
 - `05_code/tools/agentctl.py`
 - `05_code/tools/tool_registry.json`
 - `04_claude_workorders/templates/`
+- `04_claude_workorders/claude_dispatch_config.example.json`
 - `08_agent_design/`
 - `07_paper/`
 - `07_paper/template_raw/`
@@ -32,7 +33,9 @@
 - `__pycache__/`
 - LaTeX 临时文件：`*.aux`, `*.log`, `*.out`, `*.toc`
 - Claude 运行时日志和终端脚本：`04_claude_workorders/dispatch_logs/*.log`, `04_claude_workorders/terminal_runs/*`
+- 本机 Claude Code 配置：`04_claude_workorders/claude_dispatch_config.json`
 - 本机生成的 `.vscode/tasks.json`
+- 旧题归档审计目录：`00_shared/archive/stale_artifacts/`
 
 ## Windows 首次自检
 
@@ -64,7 +67,11 @@ Math Magic: Claude smoke test
 python 05_code/tools/agentctl.py doctor --strict
 python -m py_compile 05_code/tools/agentctl.py
 python -m json.tool 05_code/tools/tool_registry.json
+python -m json.tool 04_claude_workorders/claude_dispatch_config.example.json
+python 05_code/tools/agentctl.py archive-stale-artifacts --dry-run
 python 05_code/tools/agentctl.py tools
 ```
 
 如果要发布完整训练仓库，确认没有单文件超过 GitHub 100MB 限制。当前优秀论文压缩包 `math_exmaple.zip` 约 80MB，低于单文件限制；如后续超过限制，应拆包或使用 Git LFS。
+
+发布前还要确认 `environment.yml` 未固定 Python 小版本，且仓库内没有个人 Windows 用户名、VS Code 扩展绝对路径、Claude 运行状态文件或旧题归档目录。

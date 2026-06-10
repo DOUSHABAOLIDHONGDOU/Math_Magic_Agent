@@ -35,14 +35,14 @@
 
 ## V0.2.1 C 题实测补丁
 
-- 已导入 `CUMCM2025Problems.zip` 中 C 题。
+- 支持导入本地训练题面和附件数据。
 - 已为 Q1-Q4 生成 A/B/C 三套方案。
 - 已验证并发 `prepare-schemes` 不再丢失状态。
 - 用户反馈后确认：不能将 Q1-Q4 同时推进到审批和 Claude Code 执行。
 
 ## V0.2.2 逐问推进修正
 
-- 正式流程改为逐问推进，当前问题模型确认后才解锁下一问。
+- 正式流程改为逐问推进；当前规则要求前一问单题入文、PDF 编译和版面检查通过后才解锁下一问。
 - 新增 `set-active-question`，用于设置当前解锁问题并延后后续问题。
 - 新增 `create-approval-brief`，生成只面向当前问题的三方案用户审批简报。
 - 新增 `create-claude-prompt`，用户选定方案后生成可直接发给 Claude Code 的提示词。
@@ -55,7 +55,7 @@
 - 新增 `check-claude`，用于单次检查 Claude Code 完成报告和标准输出文件。
 - 新增 `watch-claude`，用于定时轮询 Claude Code 是否完成。
 - 支持检测到完成后自动摄取完成报告，并生成 Codex 审查模板。
-- Q1-B 首次自动检测成功后，Codex 审查结论为 `REVISE`，已生成返修提示词。
+- 首次自动检测成功后，Codex 可记录 `PASS` / `REVISE` / `BLOCKED` 并生成返修提示词。
 
 ## V0.2.4 Claude 自动调度适配器
 
@@ -75,7 +75,7 @@
 
 - `dispatch-claude --mode auto` 会自动搜索 PATH 中的 `claude`/`claude-code`。
 - 若 PATH 中没有命令，会继续搜索 VSCode/Cursor/Windsurf Claude Code 插件目录中的 `resources/native-binary/claude`。
-- 自动发现命令默认使用 `-p --ide --permission-mode acceptEdits`，通过 stdin 接收 Codex 生成的工单提示词。
+- 当时自动发现命令使用 CLI/stdin 方式；该历史权限策略已被 V0.2.25 的可见终端、`bypassPermissions` 和 `--continue` 默认策略取代。
 - 用户仍可显式使用 `--mode vscode` 保留 VSCode 面板读固定任务文件的工作方式。
 
 ## V0.2.7 VSCode 面板派发
@@ -93,8 +93,8 @@
 
 ## V0.2.9 增量论文写入与中文图规则
 
-- 新增 `write-question-paper`：每个问题完成模型确认和图表审批后，写入对应 `model_qX.tex` 并默认编译一次 PDF。
-- 新增 `finalize-summary-paper`：守卫摘要、模型检验、模型评价等总结性内容，未完成全部问题前不允许进入最终总结写作。
+- 新增 `write-question-paper`：每个问题完成模型确认后，写入对应 `model_qX.tex` 并默认编译一次 PDF；最终中文图可在图表审批后补入。
+- 新增 `finalize-summary-paper`：守卫摘要、模型检验、模型评价、AI 使用说明等总结性内容，未完成全部问题前不允许进入最终总结写作。
 - 论文流程明确：每题入文后必须编译 `07_paper/main.pdf`。
 - 图表规则明确：最终入论文图必须中文化，Claude Code 英文图只作为验收和重绘参考。
 
@@ -104,10 +104,10 @@
 - Codex 复审 `PASS` 后，必须先给用户模型确认选项：标准批准、带论文约束批准、不批准返修/重跑。
 - 用户选择后，Codex 才能运行 `confirm-model`。
 
-## V0.2.11 Q1 真实入文渲染
+## V0.2.11 单题真实入文渲染
 
-- `write-question-paper --question Q1` 在 Q1-B 通过模型确认和图表审批后，可根据结果表生成真实 LaTeX 小节。
-- Q1 小节包含模型表达式、变量定义、核心指标表、中文图表、敏感性分析、误差分析和本问小结。
+- `write-question-paper --question QX` 在模型确认后，可根据结果表生成真实 LaTeX 小节并编译 PDF。
+- 单题小节包含模型表达式、变量定义、核心指标表、敏感性分析、误差分析和本问小结；中文图表在图表审批后补入。
 - 入文图使用 Codex 审批通过的中文最终图，不直接采用 Claude Code 的英文验收图。
 
 ## V0.2.12 VSCode 面板重复打开守卫
@@ -139,7 +139,7 @@
 
 - 用户决定安装全局 Claude Code，避免继续依赖 VSCode 插件私有 binary。
 - base 环境已安装 Node.js/npm，并通过 npm 安装 `@anthropic-ai/claude-code`。
-- 新增 `04_claude_workorders/claude_dispatch_config.json`，命令固定为 `claude -p --permission-mode acceptEdits`。
+- 新增 `04_claude_workorders/claude_dispatch_config.json`，用于固定本机 Claude Code 调度命令；当前命令格式以 V0.2.25 为准。
 - 自动发现命令默认去掉 `--ide`，避免后台执行时等待 VSCode 插件连接。
 - `environment.yml` 增加 `nodejs`，`INSTALL.md` 增加 Claude Code CLI 安装说明。
 
@@ -156,7 +156,7 @@
 - 用户进一步要求看到像真实终端中运行 Claude Code 一样的实时界面，同时 Codex 仍能继续对话和监听。
 - 新增 `dispatch-claude --mode terminal`。
 - 该模式会生成 `04_claude_workorders/terminal_runs/*.sh`，打开 macOS Terminal 并运行交互式 Claude Code。
-- 默认 `--terminal-permission-mode default`，权限审批显示在终端中由用户处理。
+- 当时默认让权限审批显示在终端中由用户处理；当前本地训练默认已在 V0.2.25 改为 `bypassPermissions`，减少重复点击。
 - 终端状态写入 `04_claude_workorders/terminal_runs/CURRENT_TERMINAL_STATUS.json`。
 
 ## V0.2.19 调度瘦身与图表版面守卫
@@ -196,6 +196,35 @@
 - VS Code 任务生成支持 `--target-os windows`，可生成 PowerShell 版 Claude 执行和监控脚本。
 - 新增 `doctor` 一键自检，检查环境、工具、Claude Code、VS Code smoke task、LaTeX 模板和优秀论文资源。
 - 最终论文图表规则新增：禁止图内底部长批注，禁止红色虚线参考线/阈值线/边界线；解释条件转入正文、图注或表格备注。
+
+## V0.2.25 Windows 可见终端与兼容性修正
+
+- `environment.yml` 不再固定 Python 小版本，只声明 `python`，由用户本机或 conda 环境解析可用版本。
+- `agentctl.py` 保持对较旧 Python/PowerShell 的兼容写法：布尔参数兼容无 `BooleanOptionalAction` 的环境，Windows 状态脚本避免依赖 `ConvertFrom-Json -AsHashtable`。
+- `dispatch-claude --mode auto/terminal` 默认在当前项目根目录打开可见终端运行 Claude Code。
+- Claude Code 默认使用 `bypassPermissions` 和 `--dangerously-skip-permissions`，适配本地可信训练工作流，减少逐次权限点击。
+- Claude Code 默认追加 `--continue`，复用当前项目目录下最近的 Claude Code 会话上下文；只有显式 `--claude-session-mode new` 才开启新上下文。
+- 新增 `dispatch-claude --no-open`，用于只生成并检查终端脚本，不立即打开 Claude。
+- 终端状态区分 `terminal_script_created`、`running`、`finished`，并记录 `run_started_at`；`check-claude` 只在 Claude 实际运行后才用新鲜度时间过滤输出，避免预生成脚本把旧结果误判为 stale。
+- PowerShell 脚本以 UTF-8 BOM 写入，避免中文 Windows 用户名在 Claude binary 路径中乱码。
+
+## V0.2.26 旧题产物归档与防污染
+
+- 新增 `archive-stale-artifacts`，用于归档疑似旧题/旧主题生成物，默认先 dry-run；显式加 `--force` 后才移动文件。
+- `import-problem` 默认在导入新题前归档上一题生成物；可用 `--no-archive-existing-generated` 显式关闭。
+- 归档文件移动到 `00_shared/archive/stale_artifacts/<timestamp>/`，同时生成 `manifest.json` 和 `manifest.md`，便于审计和回滚。
+- 检测逻辑使用旧主题关键词与当前题面关键词的证据比较，避免当前完成报告因提到“已清理旧文件”而被误归档。
+- 归档论文问题小节后自动补回占位 `model_qX.tex`，避免 LaTeX 主文件因旧正文移走而断编译。
+- 真实运行验证了旧题产物归档机制；分发模板不保留具体题目的归档内容。
+
+## V0.2.27 小问即入文编译
+
+- `write-question-paper` 默认不再要求图表审批；模型确认后即可写入对应小问正文、公式和结果表，并立即编译 PDF。
+- 新增 `write-question-paper --require-figures-approved`，用于需要恢复旧式严格图表门禁的场景。
+- `finalize-summary-paper` 的总结性守卫扩展到论文 AI 使用说明，摘要、全局评价和 AI 使用说明必须等全部小问入文后统一整理。
+- 逐问推进依赖从 `model_confirmed` 收紧为 `paper_written`：前一问未成功编译入文前，不解锁后一问。
+- LaTeX class 新增 Windows/macOS/Fandol 中文字体自动兜底，避免 Windows 安装 `xelatex` 后仍因 macOS 字体名失败。
+- 分发模板不内置具体测试题；新用户导入题目后可用任一已确认小问验证“小问入文编译”流程。
 
 ## V0.3 待 Claude Code 实验后开发
 

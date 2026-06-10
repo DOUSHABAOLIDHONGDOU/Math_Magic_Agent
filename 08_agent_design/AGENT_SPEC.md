@@ -11,17 +11,19 @@
 职责：
 
 - 读取题目、数据说明、优秀论文和 LaTeX 模板。
-- 按题目顺序逐问推进；当前问题模型确认后再解锁下一问。
+- 按题目顺序逐问推进；当前问题入文、编译和版面检查通过后再解锁下一问。
 - 对当前问题生成 A/B/C 三套建模方案。
 - 生成用户审批简报。
 - 用户选择方案后，生成 Claude Code 执行提示词和工单。
 - 审查 Claude Code 的代码、结果和日志。
 - 汇总三套方案结果，给出推荐。
-- 生成最终图表并插入 LaTeX。
+- 小问模型确认后，立即写入对应 LaTeX 小节并编译 PDF。
+- 生成最终图表，审批后补入 LaTeX 并重新编译。
 - 对流程图、机制图、结构示意图按 imagegen skill 规则生成项目位图资产。
 - 撰写中文 CUMCM 风格论文。
 - 整理代码附录。
 - 维护共享状态和 AI 使用记录。
+- 摘要、全局问题分析、模型评价和论文 AI 使用说明等总结性内容最后统一整理。
 
 限制：
 
@@ -65,9 +67,8 @@ INIT
   -> CODE_COMPLETED
   -> CODE_REVIEWED
   -> MODEL_CONFIRMED
-  -> FIGURES_GENERATED
-  -> FIGURES_APPROVED
   -> PAPER_WRITTEN
+  -> FIGURES_GENERATED / FIGURES_APPROVED
   -> APPENDIX_READY
   -> FINAL_REVIEW
 ```
@@ -94,6 +95,7 @@ Codex 与 Claude Code 通过文件通信：
 - `tools`：读取并打印工具注册表。
 - `init-state`：初始化机器可读状态。
 - `import-problem`：导入题目。
+- `archive-stale-artifacts`：归档旧题/旧主题生成物，防止新题流程读取旧脚本、旧工单、旧图或旧论文段落。
 - `scan-data`：扫描数据字段。
 - `approve-language`：记录语言审批。
 - `set-active-question`：设置当前逐问推进的问题。
@@ -107,12 +109,13 @@ Codex 与 Claude Code 通过文件通信：
 - `compare-schemes`：生成方案对比模板。
 - `confirm-model`：记录最终模型确认。
 - `approve-figures`：记录图表审批。
+- `write-question-paper`：模型确认后写入单题 LaTeX 小节并编译 PDF。
 - `mark-paper-written`：记录论文写入状态。
 - `paper-check`：检查论文关键文件。
 - `latex-check`：编译当前论文。
 - `readiness`：输出当前流程就绪状态。
 
-该脚本是 V0.2 agent 编排器的命令层。真实题目测试后，应继续扩展自动拆题、深度 OCR 选择、输出文件审查和代码附录自动整理。
+该脚本是 V0.2 agent 编排器的命令层。换题时 `import-problem` 默认归档上一题生成物；如在真实运行中发现旧题污染，Codex 应先运行 `archive-stale-artifacts --dry-run` 审查清单，再用 `--force` 归档。真实题目测试后，应继续扩展自动拆题、深度 OCR 选择、输出文件审查和代码附录自动整理。
 
 ## 工具注册表
 

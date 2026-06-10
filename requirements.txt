@@ -13,4 +13,6 @@ statsmodels
 networkx
 pillow
 tqdm
+rank-bm25
+pytest
 
