@@ -36,6 +36,18 @@ date: "2026-06-10"
 于是趁机把整套流程**沉淀成一个命令化的 agent**，既是我自己的训练工具，也方便
 后面想用 AI 工作流但还不知道怎么搭的同学直接抄作业。
 
+### 原帖截图
+
+![原帖（1/3）](docs/images/inspiration_post_part1.jpg){ width=55% }
+
+![原帖（2/3）](docs/images/inspiration_post_part2.jpg){ width=55% }
+
+![原帖（3/3）](docs/images/inspiration_post_part3.jpg){ width=55% }
+
+完整原图见 `docs/images/inspiration_post.jpg`，或仓库
+[在线浏览](https://github.com/DOUSHABAOLIDHONGDOU/Math_Magic_Agent/blob/main/docs/images/inspiration_post.jpg)。
+帖子来源：启翔湖畔（学习论坛）频道，作者 `.r`，发布于 2026-05-16，浏览 1.5 万。
+
 ---
 
 ## 二、它解决了什么问题
